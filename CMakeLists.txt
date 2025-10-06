@@ -128,15 +128,15 @@ endif()
 
 # see https://cmake.org/cmake/help/latest/prop_tgt/MSVC_RUNTIME_LIBRARY.html
 # https://stackoverflow.com/questions/14172856/compile-with-mt-instead-of-md-using-cmake
-if(MSVC)
-  add_compile_options(
-      $<$<CONFIG:>:/MT> #---------|
-      $<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
-      $<$<CONFIG:Release>:/MT> #--|
-      $<$<CONFIG:RelWithDebInfo>:/MT>
-      $<$<CONFIG:MinSizeRel>:/MT>
-  )
-endif()
+# if(MSVC)
+  # add_compile_options(
+      # $<$<CONFIG:>:/MT> #---------|
+      # $<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
+      # $<$<CONFIG:Release>:/MT> #--|
+      # $<$<CONFIG:RelWithDebInfo>:/MT>
+      # $<$<CONFIG:MinSizeRel>:/MT>
+  # )
+# endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL OHOS)
   set(CMAKE_CXX_FLAGS "-Wno-unused-command-line-argument ${CMAKE_CXX_FLAGS}")
