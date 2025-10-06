@@ -195,8 +195,7 @@ if(location_onnxruntime_header_dir AND location_onnxruntime_lib)
     add_library(onnxruntime SHARED IMPORTED)
 
     if(WIN32)
-	  message("set_target_properties onnxruntime IMPORTED_LOCATION=${location_onnxruntime_lib}, IMPORTED_IMPLIB=${location_onnxruntime_lib2}, INTERFACE_INCLUDE_DIRECTORIES=${location_onnxruntime_header_dir}")
-      set_target_properties(onnxruntime PROPERTIES
+	  set_target_properties(onnxruntime PROPERTIES
         IMPORTED_LOCATION ${location_onnxruntime_lib}
         IMPORTED_IMPLIB ${location_onnxruntime_lib2}
         INTERFACE_INCLUDE_DIRECTORIES "${location_onnxruntime_header_dir}"
