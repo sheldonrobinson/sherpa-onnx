@@ -241,7 +241,7 @@ if(SHERPA_ONNX_ENABLE_CHECK)
 endif()
 
 # Always static build
-add_library(sherpa-onnx-core STATIC ${sources})
+add_library(sherpa-onnx-core ${sources})
 
 
 if(WIN32 AND SHERPA_ONNX_LINK_D3D)
