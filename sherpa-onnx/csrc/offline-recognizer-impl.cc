@@ -4,6 +4,7 @@
 
 #include "sherpa-onnx/csrc/offline-recognizer-impl.h"
 
+#include <memory>
 #include <string>
 #include <strstream>
 #include <utility>
@@ -39,6 +40,11 @@
 #include "sherpa-onnx/csrc/rknn/offline-recognizer-sense-voice-rknn-impl.h"
 #endif
 
+#if SHERPA_ONNX_ENABLE_ASCEND_NPU
+#include "sherpa-onnx/csrc/ascend/offline-recognizer-paraformer-ascend-impl.h"
+#include "sherpa-onnx/csrc/ascend/offline-recognizer-sense-voice-ascend-impl.h"
+#endif
+
 namespace sherpa_onnx {
 
 std::unique_ptr<OfflineRecognizerImpl> OfflineRecognizerImpl::Create(
@@ -55,7 +61,29 @@ std::unique_ptr<OfflineRecognizerImpl> OfflineRecognizerImpl::Create(
 #else
     SHERPA_ONNX_LOGE(
         "Please rebuild sherpa-onnx with -DSHERPA_ONNX_ENABLE_RKNN=ON if you "
-        "want to use rknn.");
+        "want to use rknn. See also "
+        "https://k2-fsa.github.io/sherpa/onnx/rknn/install.html");
+    SHERPA_ONNX_EXIT(-1);
+    return nullptr;
+#endif
+  }
+
+  if (config.model_config.provider == "ascend") {
+#if SHERPA_ONNX_ENABLE_ASCEND_NPU
+    if (!config.model_config.sense_voice.model.empty()) {
+      return std::make_unique<OfflineRecognizerSenseVoiceAscendImpl>(config);
+    } else if (!config.model_config.paraformer.model.empty()) {
+      return std::make_unique<OfflineRecognizerParaformerAscendImpl>(config);
+    } else {
+      SHERPA_ONNX_LOGE(
+          "Only SenseVoice and Paraformer models are currently supported "
+          "by Ascend NPU for non-streaming ASR. Fallback to CPU");
+    }
+#else
+    SHERPA_ONNX_LOGE(
+        "Please rebuild sherpa-onnx with -DSHERPA_ONNX_ENABLE_ASCEND_NPU=ON if "
+        "you want to use Ascend NPU. See also "
+        "https://k2-fsa.github.io/sherpa/onnx/ascend/install.html");
     SHERPA_ONNX_EXIT(-1);
     return nullptr;
 #endif
@@ -73,6 +101,7 @@ std::unique_ptr<OfflineRecognizerImpl> OfflineRecognizerImpl::Create(
       !config.model_config.zipformer_ctc.model.empty() ||
       !config.model_config.tdnn.model.empty() ||
       !config.model_config.wenet_ctc.model.empty() ||
+      !config.model_config.omnilingual.model.empty() ||
       !config.model_config.dolphin.model.empty()) {
     return std::make_unique<OfflineRecognizerCtcImpl>(config);
   }
@@ -263,7 +292,31 @@ std::unique_ptr<OfflineRecognizerImpl> OfflineRecognizerImpl::Create(
 #else
     SHERPA_ONNX_LOGE(
         "Please rebuild sherpa-onnx with -DSHERPA_ONNX_ENABLE_RKNN=ON if you "
-        "want to use rknn.");
+        "want to use rknn. See also "
+        "https://k2-fsa.github.io/sherpa/onnx/rknn/install.html");
+    SHERPA_ONNX_EXIT(-1);
+    return nullptr;
+#endif
+  }
+
+  if (config.model_config.provider == "ascend") {
+#if SHERPA_ONNX_ENABLE_ASCEND_NPU
+    if (!config.model_config.sense_voice.model.empty()) {
+      return std::make_unique<OfflineRecognizerSenseVoiceAscendImpl>(mgr,
+                                                                     config);
+    } else if (!config.model_config.paraformer.model.empty()) {
+      return std::make_unique<OfflineRecognizerParaformerAscendImpl>(mgr,
+                                                                     config);
+    } else {
+      SHERPA_ONNX_LOGE(
+          "Only SenseVoice and Paraformer models are currently supported "
+          "by Ascend NPU for non-streaming ASR. Fallback to CPU");
+    }
+#else
+    SHERPA_ONNX_LOGE(
+        "Please rebuild sherpa-onnx with -DSHERPA_ONNX_ENABLE_ASCEND_NPU=ON if "
+        "you want to use Ascend NPU. See also "
+        "https://k2-fsa.github.io/sherpa/onnx/ascend/install.html");
     SHERPA_ONNX_EXIT(-1);
     return nullptr;
 #endif
@@ -281,6 +334,7 @@ std::unique_ptr<OfflineRecognizerImpl> OfflineRecognizerImpl::Create(
       !config.model_config.zipformer_ctc.model.empty() ||
       !config.model_config.tdnn.model.empty() ||
       !config.model_config.wenet_ctc.model.empty() ||
+      !config.model_config.omnilingual.model.empty() ||
       !config.model_config.dolphin.model.empty()) {
     return std::make_unique<OfflineRecognizerCtcImpl>(mgr, config);
   }
@@ -550,8 +604,8 @@ OfflineRecognizerImpl::OfflineRecognizerImpl(
         itn_list_.push_back(
             std::make_unique<kaldifst::TextNormalizer>(std::move(r)));
       }  // for (; !reader->Done(); reader->Next())
-    }    // for (const auto &f : files)
-  }      // if (!config.rule_fars.empty())
+    }  // for (const auto &f : files)
+  }  // if (!config.rule_fars.empty())
 
   if (!config.hr.lexicon.empty() && !config.hr.rule_fsts.empty()) {
     auto hr_config = config.hr;

@@ -44,6 +44,8 @@ set(sources
   offline-moonshine-model.cc
   offline-nemo-enc-dec-ctc-model-config.cc
   offline-nemo-enc-dec-ctc-model.cc
+  offline-omnilingual-asr-ctc-model-config.cc
+  offline-omnilingual-asr-ctc-model.cc
   offline-paraformer-greedy-search-decoder.cc
   offline-paraformer-model-config.cc
   offline-paraformer-model.cc
@@ -160,6 +162,10 @@ list(APPEND sources
   offline-zipformer-audio-tagging-model.cc
 )
 
+list(APPEND sources
+  qnn-config.cc
+)
+
 # punctuation
 list(APPEND sources
   offline-ct-transformer-model.cc
@@ -173,7 +179,6 @@ list(APPEND sources
 )
 if(SHERPA_ONNX_ENABLE_RKNN)
   list(APPEND sources
-    ./rknn/offline-ctc-greedy-search-decoder-rknn.cc
     ./rknn/offline-sense-voice-model-rknn.cc
     ./rknn/online-stream-rknn.cc
     ./rknn/online-transducer-greedy-search-decoder-rknn.cc
@@ -187,12 +192,35 @@ if(SHERPA_ONNX_ENABLE_RKNN)
 
 endif()
 
+if(SHERPA_ONNX_ENABLE_RKNN OR SHERPA_ONNX_ENABLE_ASCEND_NPU)
+  list(APPEND sources
+    ./rknn/offline-ctc-greedy-search-decoder-rknn.cc
+  )
+endif()
+
+if(SHERPA_ONNX_ENABLE_ASCEND_NPU)
+  list(APPEND sources
+    ./ascend/offline-paraformer-model-ascend.cc
+    ./ascend/offline-sense-voice-model-ascend.cc
+    ./ascend/utils.cc
+  )
+endif()
+
+if(SHERPA_ONNX_ENABLE_QNN)
+  list(APPEND sources
+    ./qnn/qnn-backend.cc
+    ./qnn/qnn-model.cc
+    ./qnn/utils.cc
+  )
+endif()
+
 if(SHERPA_ONNX_ENABLE_TTS)
   list(APPEND sources
     character-lexicon.cc
     hifigan-vocoder.cc
     kokoro-multi-lang-lexicon.cc
     lexicon.cc
+    matcha-tts-lexicon.cc
     melo-tts-lexicon.cc
     offline-tts-character-frontend.cc
     offline-tts-frontend.cc
@@ -207,8 +235,8 @@ if(SHERPA_ONNX_ENABLE_TTS)
     offline-tts-vits-model-config.cc
     offline-tts-vits-model.cc
     offline-tts-zipvoice-frontend.cc
-    offline-tts-zipvoice-model.cc
     offline-tts-zipvoice-model-config.cc
+    offline-tts-zipvoice-model.cc
     offline-tts.cc
     piper-phonemize-lexicon.cc
     vocoder.cc
@@ -290,6 +318,18 @@ if(SHERPA_ONNX_ENABLE_RKNN)
   else()
     target_link_libraries(sherpa-onnx-core rknnrt)
   endif()
+endif()
+
+if(SHERPA_ONNX_ENABLE_ASCEND_NPU)
+    target_include_directories(sherpa-onnx-core PRIVATE ${ASCEND_TOOLKIT_HOME}/include)
+    target_link_libraries(sherpa-onnx-core
+      -L${ASCEND_TOOLKIT_HOME}/lib64
+      -lascendcl
+    )
+endif()
+
+if(SHERPA_ONNX_ENABLE_QNN)
+  target_include_directories(sherpa-onnx-core PRIVATE ${QNN_SDK_ROOT}/include/QNN)
 endif()
 
 if(TARGET onnxruntime)
