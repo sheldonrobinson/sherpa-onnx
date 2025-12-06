@@ -1,3 +1,46 @@
+## 1.12.19
+
+* Fix building without TTS for C API (#2838)
+* [ZipVoice] Fix english tokenization error (#2834)
+* Add simulate streaming ASR Python example for Paraformer (#2839)
+* Fix building JNI for Windows (#2840)
+* Avoid NaN in NeMo speaker embedding models. (#2844)
+* Add spacemit ort ep for spacemit riscv cpus (#2837)
+* Add token-level confidence scores (ys_probs) for offline transducer models (#2843)
+* Fix token log probabilities in offline transducer modified beam search decoder (#2846)
+* Support AXERA ax630, ax650, and axcl backends. (#2849)
+* Refactor axera npu examples (#2850)
+* Fix matcha tts zh-en model (#2851)
+* Fix the English part for Matcha TTS. (#2853)
+* Refactor text-utils (#2855)
+* Fix matcha tts (#2856)
+* Add a space between English words for Matcha zh-en TTS (#2858)
+* Fix punctuations in matcha zh-en tts (#2859)
+* Upload matcha tts zh-en model (#2865)
+* Fix the discrepancy with the Silero VAD isSpeech logic (#2863)
+
+## 1.12.18
+
+* Fix building wheels (#2786)
+* export omniASR_CTC_1B (#2788)
+* Add C++ QNN support for SenseVoice (#2793)
+* Export models for CANN toolkit 7.0 (#2795)
+* Support hotwords with byte level bpe (#2802)
+* Add Android demo with QNN (Qualcomm NPU) for SenseVoice ASR (#2803)
+* Export zipformer ctc models to QNN (#2815)
+* Add spaces between English words for Homophone replacer. (#2817)
+* Add C++ QNN support for Zipformer CTC models. (#2809)
+* Limit symbol visibility in the shared libraries (#2822)
+* Fix warnings for initializing tts lexicon. (#2823)
+* Export zipformer ctc models to Ascend NPU (#2824)
+* Refactor scripts for exporting models to Ascend NPU. (#2825)
+* Add C++ support for Zipformer CTC on Ascend NPU (#2826)
+* Fix segfault when non-wav file is passed to ReadWave (#2821)
+* Avoid calling rknn_dup_context(). (#2828)
+* Add C++ support for Paraformer with RK NPU (#2829)
+* Update README to include NPU support (#2830)
+* Support running whisper large v3 with external data weight (#2807)
+
 ## 1.12.17
 
 * Fix releasing
