@@ -206,8 +206,13 @@ endif()
 
 if(SHERPA_ONNX_ENABLE_AXCL)
   list(APPEND sources
+    ./axcl/axcl-engine-guard.cc
+    ./axcl/axcl-engine-io-guard.cc
+    ./axcl/axcl-engine-io-info-guard.cc
+    ./axcl/axcl-manager.cc
+    ./axcl/axcl-model.cc
     ./axcl/offline-sense-voice-model-axcl.cc
-    ./axcl/ax_model_runner_axcl.cc
+    ./axcl/utils.cc
   )
 endif()
 
@@ -256,7 +261,6 @@ if(SHERPA_ONNX_ENABLE_TTS)
     offline-tts-model-config.cc
     offline-tts-vits-model-config.cc
     offline-tts-vits-model.cc
-    offline-tts-zipvoice-frontend.cc
     offline-tts-zipvoice-model-config.cc
     offline-tts-zipvoice-model.cc
     offline-tts.cc
@@ -412,7 +416,6 @@ target_link_libraries(sherpa-onnx-core fstfar fst)
 
 if(SHERPA_ONNX_ENABLE_TTS)
   target_link_libraries(sherpa-onnx-core
-    cppinyin_core
     piper_phonemize)
 endif()
 
