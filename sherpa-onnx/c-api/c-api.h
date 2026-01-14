@@ -486,8 +486,7 @@ SHERPA_ONNX_API typedef struct SherpaOnnxOfflineOmnilingualAsrCtcModelConfig {
 
 SHERPA_ONNX_API typedef struct SherpaOnnxOfflineFunASRNanoModelConfig {
   const char *encoder_adaptor;
-  const char *llm_prefill;
-  const char *llm_decode;
+  const char *llm;
   const char *embedding;
   const char *tokenizer;
   const char *system_prompt;
@@ -528,8 +527,8 @@ SHERPA_ONNX_API typedef struct SherpaOnnxOfflineModelConfig {
   SherpaOnnxOfflineCanaryModelConfig canary;
   SherpaOnnxOfflineWenetCtcModelConfig wenet_ctc;
   SherpaOnnxOfflineOmnilingualAsrCtcModelConfig omnilingual;
-  SherpaOnnxOfflineFunASRNanoModelConfig funasr_nano;
   SherpaOnnxOfflineMedAsrCtcModelConfig medasr;
+  SherpaOnnxOfflineFunASRNanoModelConfig funasr_nano;
 } SherpaOnnxOfflineModelConfig;
 
 SHERPA_ONNX_API typedef struct SherpaOnnxOfflineRecognizerConfig {

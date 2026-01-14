@@ -110,6 +110,31 @@ static SherpaOnnxOfflineMedAsrCtcModelConfig GetOfflineMedAsrCtcModelConfig(
   return c;
 }
 
+static SherpaOnnxOfflineFunASRNanoModelConfig GetOfflineFunAsrNanoModelConfig(
+    Napi::Object obj) {
+  SherpaOnnxOfflineFunASRNanoModelConfig c;
+  memset(&c, 0, sizeof(c));
+
+  if (!obj.Has("funasrNano") || !obj.Get("funasrNano").IsObject()) {
+    return c;
+  }
+
+  Napi::Object o = obj.Get("funasrNano").As<Napi::Object>();
+
+  SHERPA_ONNX_ASSIGN_ATTR_STR(encoder_adaptor, encoderAdaptor);
+  SHERPA_ONNX_ASSIGN_ATTR_STR(llm, llm);
+  SHERPA_ONNX_ASSIGN_ATTR_STR(embedding, embedding);
+  SHERPA_ONNX_ASSIGN_ATTR_STR(tokenizer, tokenizer);
+  SHERPA_ONNX_ASSIGN_ATTR_STR(system_prompt, systemPrompt);
+  SHERPA_ONNX_ASSIGN_ATTR_STR(user_prompt, userPrompt);
+  SHERPA_ONNX_ASSIGN_ATTR_INT32(max_new_tokens, maxNewTokens);
+  SHERPA_ONNX_ASSIGN_ATTR_FLOAT(temperature, temperature);
+  SHERPA_ONNX_ASSIGN_ATTR_FLOAT(top_p, topP);
+  SHERPA_ONNX_ASSIGN_ATTR_INT32(seed, seed);
+
+  return c;
+}
+
 static SherpaOnnxOfflineDolphinModelConfig GetOfflineDolphinModelConfig(
     Napi::Object obj) {
   SherpaOnnxOfflineDolphinModelConfig c;
@@ -277,6 +302,7 @@ static SherpaOnnxOfflineModelConfig GetOfflineModelConfig(Napi::Object obj) {
   c.wenet_ctc = GetOfflineWenetCtcModelConfig(o);
   c.omnilingual = GetOfflineOmnilingualAsrCtcModelConfig(o);
   c.medasr = GetOfflineMedAsrCtcModelConfig(o);
+  c.funasr_nano = GetOfflineFunAsrNanoModelConfig(o);
 
   SHERPA_ONNX_ASSIGN_ATTR_STR(tokens, tokens);
   SHERPA_ONNX_ASSIGN_ATTR_INT32(num_threads, numThreads);
@@ -372,6 +398,13 @@ static void FreeConfig(const SherpaOnnxOfflineRecognizerConfig &c) {
   SHERPA_ONNX_DELETE_C_STR(c.model_config.wenet_ctc.model);
   SHERPA_ONNX_DELETE_C_STR(c.model_config.omnilingual.model);
   SHERPA_ONNX_DELETE_C_STR(c.model_config.medasr.model);
+
+  SHERPA_ONNX_DELETE_C_STR(c.model_config.funasr_nano.user_prompt);
+  SHERPA_ONNX_DELETE_C_STR(c.model_config.funasr_nano.system_prompt);
+  SHERPA_ONNX_DELETE_C_STR(c.model_config.funasr_nano.tokenizer);
+  SHERPA_ONNX_DELETE_C_STR(c.model_config.funasr_nano.embedding);
+  SHERPA_ONNX_DELETE_C_STR(c.model_config.funasr_nano.llm);
+  SHERPA_ONNX_DELETE_C_STR(c.model_config.funasr_nano.encoder_adaptor);
 
   SHERPA_ONNX_DELETE_C_STR(c.model_config.tokens);
   SHERPA_ONNX_DELETE_C_STR(c.model_config.provider);
@@ -599,6 +632,74 @@ static void OfflineRecognizerSetConfigWrapper(const Napi::CallbackInfo &info) {
   FreeConfig(c);
 }
 
+class DecodeOfflineStreamAsyncWorker : public Napi::AsyncWorker {
+ public:
+  DecodeOfflineStreamAsyncWorker(Napi::Env env,
+                                 const SherpaOnnxOfflineRecognizer *recognizer,
+                                 const SherpaOnnxOfflineStream *stream,
+                                 Napi::Promise::Deferred deferred)
+      : Napi::AsyncWorker(env),
+        recognizer_(recognizer),
+        stream_(stream),
+        deferred_(deferred) {}
+
+  void Execute() override {
+    try {
+      SherpaOnnxDecodeOfflineStream(recognizer_, stream_);
+    } catch (const std::exception &e) {
+      SetError(e.what());
+    }
+  }
+
+  void OnOK() override {
+    const char *json = SherpaOnnxGetOfflineStreamResultAsJson(stream_);
+    Napi::String s = Napi::String::New(Env(), json);
+    SherpaOnnxDestroyOfflineStreamResultJson(json);
+    deferred_.Resolve(s);
+  }
+
+  void OnError(const Napi::Error &e) override { deferred_.Reject(e.Value()); }
+
+ private:
+  const SherpaOnnxOfflineRecognizer *recognizer_;
+  const SherpaOnnxOfflineStream *stream_;
+  Napi::Promise::Deferred deferred_;
+};
+
+static Napi::Value DecodeOfflineStreamAsyncWrapper(
+    const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+
+  if (info.Length() != 2) {
+    std::ostringstream os;
+    os << "Expect 2 arguments. Given: " << info.Length();
+    Napi::TypeError::New(env, os.str()).ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  if (!info[0].IsExternal() || !info[1].IsExternal()) {
+    Napi::TypeError::New(env,
+                         "Expected recognizer and stream as external pointers")
+        .ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  const SherpaOnnxOfflineRecognizer *recognizer =
+      info[0].As<Napi::External<SherpaOnnxOfflineRecognizer>>().Data();
+
+  const SherpaOnnxOfflineStream *stream =
+      info[1].As<Napi::External<SherpaOnnxOfflineStream>>().Data();
+
+  Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
+
+  auto *worker =
+      new DecodeOfflineStreamAsyncWorker(env, recognizer, stream, deferred);
+
+  worker->Queue();
+
+  return deferred.Promise();
+}
+
 static void DecodeOfflineStreamWrapper(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   if (info.Length() != 2) {
@@ -676,6 +777,9 @@ void InitNonStreamingAsr(Napi::Env env, Napi::Object exports) {
 
   exports.Set(Napi::String::New(env, "decodeOfflineStream"),
               Napi::Function::New(env, DecodeOfflineStreamWrapper));
+
+  exports.Set(Napi::String::New(env, "decodeOfflineStreamAsync"),
+              Napi::Function::New(env, DecodeOfflineStreamAsyncWrapper));
 
   exports.Set(Napi::String::New(env, "offlineRecognizerSetConfig"),
               Napi::Function::New(env, OfflineRecognizerSetConfigWrapper));

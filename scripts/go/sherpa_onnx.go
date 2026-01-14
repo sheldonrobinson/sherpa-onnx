@@ -454,8 +454,7 @@ type OfflineFireRedAsrModelConfig struct {
 
 type OfflineFunASRNanoModelConfig struct {
 	EncoderAdaptor string
-	LlmPreFill     string
-	LlmDecoder     string
+	LLM            string
 	Embedding      string
 	Tokenizer      string
 	SystemPrompt   string
@@ -498,7 +497,7 @@ type OfflineModelConfig struct {
 	SenseVoice   OfflineSenseVoiceModelConfig
 	Moonshine    OfflineMoonshineModelConfig
 	FireRedAsr   OfflineFireRedAsrModelConfig
-	FunASRNano   OfflineFunASRNanoModelConfig
+	FunAsrNano   OfflineFunASRNanoModelConfig
 	Dolphin      OfflineDolphinModelConfig
 	ZipformerCtc OfflineZipformerCtcModelConfig
 	Canary       OfflineCanaryModelConfig
@@ -597,17 +596,16 @@ func newCOfflineRecognizerConfig(config *OfflineRecognizerConfig) *C.struct_Sher
 	c.model_config.fire_red_asr.encoder = C.CString(config.ModelConfig.FireRedAsr.Encoder)
 	c.model_config.fire_red_asr.decoder = C.CString(config.ModelConfig.FireRedAsr.Decoder)
 
-	c.model_config.funasr_nano.encoder_adaptor = C.CString(config.ModelConfig.FunASRNano.EncoderAdaptor)
-	c.model_config.funasr_nano.llm_prefill = C.CString(config.ModelConfig.FunASRNano.LlmPreFill)
-	c.model_config.funasr_nano.llm_decode = C.CString(config.ModelConfig.FunASRNano.LlmDecoder)
-	c.model_config.funasr_nano.embedding = C.CString(config.ModelConfig.FunASRNano.Embedding)
-	c.model_config.funasr_nano.tokenizer = C.CString(config.ModelConfig.FunASRNano.Tokenizer)
-	c.model_config.funasr_nano.system_prompt = C.CString(config.ModelConfig.FunASRNano.SystemPrompt)
-	c.model_config.funasr_nano.user_prompt = C.CString(config.ModelConfig.FunASRNano.UserPrompt)
-	c.model_config.funasr_nano.max_new_tokens = C.int(config.ModelConfig.FunASRNano.MaxNewTokens)
-	c.model_config.funasr_nano.temperature = C.float(config.ModelConfig.FunASRNano.Temperature)
-	c.model_config.funasr_nano.top_p = C.float(config.ModelConfig.FunASRNano.TopP)
-	c.model_config.funasr_nano.seed = C.int(config.ModelConfig.FunASRNano.Seed)
+	c.model_config.funasr_nano.encoder_adaptor = C.CString(config.ModelConfig.FunAsrNano.EncoderAdaptor)
+	c.model_config.funasr_nano.llm = C.CString(config.ModelConfig.FunAsrNano.LLM)
+	c.model_config.funasr_nano.embedding = C.CString(config.ModelConfig.FunAsrNano.Embedding)
+	c.model_config.funasr_nano.tokenizer = C.CString(config.ModelConfig.FunAsrNano.Tokenizer)
+	c.model_config.funasr_nano.system_prompt = C.CString(config.ModelConfig.FunAsrNano.SystemPrompt)
+	c.model_config.funasr_nano.user_prompt = C.CString(config.ModelConfig.FunAsrNano.UserPrompt)
+	c.model_config.funasr_nano.max_new_tokens = C.int(config.ModelConfig.FunAsrNano.MaxNewTokens)
+	c.model_config.funasr_nano.temperature = C.float(config.ModelConfig.FunAsrNano.Temperature)
+	c.model_config.funasr_nano.top_p = C.float(config.ModelConfig.FunAsrNano.TopP)
+	c.model_config.funasr_nano.seed = C.int(config.ModelConfig.FunAsrNano.Seed)
 
 	c.model_config.dolphin.model = C.CString(config.ModelConfig.Dolphin.Model)
 	c.model_config.zipformer_ctc.model = C.CString(config.ModelConfig.ZipformerCtc.Model)
@@ -679,8 +677,7 @@ func freeCOfflineRecognizerConfig(c *C.struct_SherpaOnnxOfflineRecognizerConfig)
 		&c.model_config.fire_red_asr.encoder,
 		&c.model_config.fire_red_asr.decoder,
 		&c.model_config.funasr_nano.encoder_adaptor,
-		&c.model_config.funasr_nano.llm_prefill,
-		&c.model_config.funasr_nano.llm_decode,
+		&c.model_config.funasr_nano.llm,
 		&c.model_config.funasr_nano.embedding,
 		&c.model_config.funasr_nano.tokenizer,
 		&c.model_config.funasr_nano.system_prompt,

@@ -511,12 +511,13 @@ static sherpa_onnx::OfflineRecognizerConfig GetOfflineRecognizerConfig(
   recognizer_config.model_config.omnilingual.model =
       SHERPA_ONNX_OR(config->model_config.omnilingual.model, "");
 
+  recognizer_config.model_config.medasr.model =
+      SHERPA_ONNX_OR(config->model_config.medasr.model, "");
+
   recognizer_config.model_config.funasr_nano.encoder_adaptor =
       SHERPA_ONNX_OR(config->model_config.funasr_nano.encoder_adaptor, "");
-  recognizer_config.model_config.funasr_nano.llm_prefill =
-      SHERPA_ONNX_OR(config->model_config.funasr_nano.llm_prefill, "");
-  recognizer_config.model_config.funasr_nano.llm_decode =
-      SHERPA_ONNX_OR(config->model_config.funasr_nano.llm_decode, "");
+  recognizer_config.model_config.funasr_nano.llm =
+      SHERPA_ONNX_OR(config->model_config.funasr_nano.llm, "");
   recognizer_config.model_config.funasr_nano.embedding =
       SHERPA_ONNX_OR(config->model_config.funasr_nano.embedding, "");
   recognizer_config.model_config.funasr_nano.tokenizer =
@@ -524,19 +525,16 @@ static sherpa_onnx::OfflineRecognizerConfig GetOfflineRecognizerConfig(
   recognizer_config.model_config.funasr_nano.system_prompt =
       SHERPA_ONNX_OR(config->model_config.funasr_nano.system_prompt,
                      "You are a helpful assistant.");
-  recognizer_config.model_config.funasr_nano.user_prompt =
-      SHERPA_ONNX_OR(config->model_config.funasr_nano.user_prompt,
-                     "语音转写：");
+  recognizer_config.model_config.funasr_nano.user_prompt = SHERPA_ONNX_OR(
+      config->model_config.funasr_nano.user_prompt, "语音转写：");
   recognizer_config.model_config.funasr_nano.max_new_tokens =
       SHERPA_ONNX_OR(config->model_config.funasr_nano.max_new_tokens, 512);
   recognizer_config.model_config.funasr_nano.temperature =
-      SHERPA_ONNX_OR(config->model_config.funasr_nano.temperature, 0.3f);
+      SHERPA_ONNX_OR(config->model_config.funasr_nano.temperature, 1e-6f);
   recognizer_config.model_config.funasr_nano.top_p =
       SHERPA_ONNX_OR(config->model_config.funasr_nano.top_p, 0.8f);
   recognizer_config.model_config.funasr_nano.seed =
       SHERPA_ONNX_OR(config->model_config.funasr_nano.seed, 42);
-  recognizer_config.model_config.medasr.model =
-      SHERPA_ONNX_OR(config->model_config.medasr.model, "");
 
   recognizer_config.lm_config.model =
       SHERPA_ONNX_OR(config->lm_config.model, "");
