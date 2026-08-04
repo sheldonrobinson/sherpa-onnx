@@ -272,7 +272,7 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install wheel twine==5.0.0 setuptools
 
-          twine upload /tmp/wheels/*.whl
+          twine upload --skip-existing --verbose /tmp/wheels/*.whl
 
 
   build_wheels_armv7l:
@@ -307,7 +307,7 @@ jobs:
           docker run --rm \
             --platform linux/arm/v7 \
             --volume ${{ github.workspace }}/:/home/runner/work/sherpa-onnx/sherpa-onnx \
-            quay.io/pypa/manylinux_2_35_armv7l \
+            quay.io/pypa/manylinux_2_35_armv7l${{ matrix.python-version == '3.8' && ':2025.11.29-1' || '' }} \
             bash -c '
               find / -name "*gcc*" 2>/dev/null
 
@@ -457,4 +457,4 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install wheel twine==5.0.0 setuptools
 
-          twine upload ./wheelhouse/*.whl
+          twine upload --skip-existing --verbose ./wheelhouse/*.whl

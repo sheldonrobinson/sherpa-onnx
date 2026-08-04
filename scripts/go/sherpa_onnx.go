@@ -939,14 +939,14 @@ func (s *OfflineStream) GetResult() *OfflineRecognizerResult {
 	p := C.SherpaOnnxGetOfflineStreamResult(s.impl)
 	defer C.SherpaOnnxDestroyOfflineRecognizerResult(p)
 	n := int(p.count)
-	if n == 0 {
-		return nil
-	}
 	result := &OfflineRecognizerResult{}
 	result.Text = C.GoString(p.text)
 	result.Lang = C.GoString(p.lang)
 	result.Emotion = C.GoString(p.emotion)
 	result.Event = C.GoString(p.event)
+	if n == 0 {
+		return result
+	}
 	result.Tokens = make([]string, n)
 	tokens := unsafe.Slice(p.tokens_arr, n)
 	for i := 0; i < n; i++ {
@@ -2748,6 +2748,11 @@ func GetGitSha1() string {
 
 func GetGitDate() string {
 	return C.GoString(C.SherpaOnnxGetGitDate())
+}
+
+// GetOnnxruntimeVersion returns the onnxruntime version string used by the library.
+func GetOnnxruntimeVersion() string {
+	return C.GoString(C.SherpaOnnxGetOnnxruntimeVersionStr())
 }
 
 type OfflineSourceSeparationSpleeterModelConfig struct {

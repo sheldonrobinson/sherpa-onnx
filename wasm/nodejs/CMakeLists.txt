@@ -120,6 +120,7 @@ set(exported_functions
   SherpaOnnxGetGitDate
   SherpaOnnxGetGitSha1
   SherpaOnnxGetVersionStr
+  SherpaOnnxGetOnnxruntimeVersionStr
 )
 
 

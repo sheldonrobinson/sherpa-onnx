@@ -4,11 +4,11 @@ set -ex
 
 cd "$(dirname "$0")"
 
-old_version_code=20260424
-new_version_code=20260428
+old_version_code=20260608
+new_version_code=20260707
 
-old_version="1\.12\.40"
-new_version="1\.13\.0"
+old_version="1\.13\.3"
+new_version="1\.13\.4"
 
 replace_str="s/$old_version/$new_version/g"
 
@@ -31,8 +31,21 @@ sed -i.bak "s/  static const char \*date.*/  static const char \*date = \"$date\
 find scripts/wheel -name "setup.py" -type f -exec sed -i.bak "$replace_str" {} \;
 sed -i.bak "$replace_str" ./setup.py
 
+sed -i.bak "$replace_str" ./build-ios.sh
 sed -i.bak "$replace_str" ./build-ios-shared.sh
+sed -i.bak "$replace_str" ./build-ios-no-tts.sh
+sed -i.bak "$replace_str" ./build-macos.sh
+sed -i.bak "$replace_str" ./build-macos-shared.sh
+sed -i.bak "$replace_str" ./build-macos-shared-sherpa-with-static-onnxruntime.sh
+sed -i.bak "$replace_str" ./build-ios-shared-sherpa-with-static-onnxruntime.sh
+sed -i.bak "$replace_str" ./.github/workflows/test-flutter-package.yaml
+
+for f in ./build-ios.sh ./build-ios-shared.sh ./build-ios-no-tts.sh ./build-macos.sh ./build-macos-shared.sh; do
+  sed -i.bak "s/$old_version_code/$new_version_code/g" "$f"
+done
 sed -i.bak "$replace_str" ./pom.xml
+sed -i.bak "$replace_str" ./sherpa-onnx/java-api/pom.xml
+sed -i.bak "$replace_str" ./sherpa-onnx/java-api/README.md
 sed -i.bak "$replace_str" ./jitpack.yml
 sed -i.bak "$replace_str" ./android/SherpaOnnxAar/README.md
 

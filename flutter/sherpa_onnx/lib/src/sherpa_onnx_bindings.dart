@@ -1795,6 +1795,20 @@ typedef OnlineStreamInputFinishedNative =
 typedef OnlineStreamInputFinished =
     void Function(Pointer<SherpaOnnxOnlineStream>);
 
+typedef OnlineStreamSetOptionNative =
+    Void Function(
+      Pointer<SherpaOnnxOnlineStream>,
+      Pointer<Utf8>,
+      Pointer<Utf8>,
+    );
+
+typedef OnlineStreamSetOption =
+    void Function(
+      Pointer<SherpaOnnxOnlineStream>,
+      Pointer<Utf8>,
+      Pointer<Utf8>,
+    );
+
 typedef SherpaOnnxSpeakerEmbeddingExtractorIsReadyNative =
     Int32 Function(
       Pointer<SherpaOnnxSpeakerEmbeddingExtractor>,
@@ -1845,6 +1859,9 @@ typedef SherpaOnnxGetGitSha1 = SherpaOnnxGetGitSha1Native;
 
 typedef SherpaOnnxGetGitDateNative = Pointer<Utf8> Function();
 typedef SherpaOnnxGetGitDate = SherpaOnnxGetGitDateNative;
+
+typedef SherpaOnnxGetOnnxruntimeVersionStrNative = Pointer<Utf8> Function();
+typedef SherpaOnnxGetOnnxruntimeVersionStr = SherpaOnnxGetOnnxruntimeVersionStrNative;
 
 class SherpaOnnxBindings {
   static SherpaOnnxCreateOfflineSpeechDenoiser?
@@ -2043,6 +2060,8 @@ class SherpaOnnxBindings {
 
   static OnlineStreamInputFinished? onlineStreamInputFinished;
 
+  static OnlineStreamSetOption? onlineStreamSetOption;
+
   static SherpaOnnxSpeakerEmbeddingExtractorIsReady?
   speakerEmbeddingExtractorIsReady;
 
@@ -2086,6 +2105,7 @@ class SherpaOnnxBindings {
   static SherpaOnnxGetVersionStr? getVersionStr;
   static SherpaOnnxGetGitSha1? getGitSha1;
   static SherpaOnnxGetGitDate? getGitDate;
+  static SherpaOnnxGetOnnxruntimeVersionStr? getOnnxruntimeVersionStr;
 
   static void init(DynamicLibrary dynamicLibrary) {
     sherpaOnnxCreateOfflineSpeechDenoiser ??= dynamicLibrary
@@ -2749,6 +2769,12 @@ class SherpaOnnxBindings {
         )
         .asFunction();
 
+    onlineStreamSetOption ??= dynamicLibrary
+        .lookup<NativeFunction<OnlineStreamSetOptionNative>>(
+          'SherpaOnnxOnlineStreamSetOption',
+        )
+        .asFunction();
+
     speakerEmbeddingExtractorIsReady ??= dynamicLibrary
         .lookup<
           NativeFunction<SherpaOnnxSpeakerEmbeddingExtractorIsReadyNative>
@@ -2858,6 +2884,12 @@ class SherpaOnnxBindings {
     getGitDate ??= dynamicLibrary
         .lookup<NativeFunction<SherpaOnnxGetGitDateNative>>(
           'SherpaOnnxGetGitDate',
+        )
+        .asFunction();
+
+    getOnnxruntimeVersionStr ??= dynamicLibrary
+        .lookup<NativeFunction<SherpaOnnxGetOnnxruntimeVersionStrNative>>(
+          'SherpaOnnxGetOnnxruntimeVersionStr',
         )
         .asFunction();
   }

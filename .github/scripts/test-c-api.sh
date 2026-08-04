@@ -8,6 +8,9 @@ log() {
   echo -e "$(date '+%Y-%m-%d %H:%M:%S') (${fname}:${BASH_LINENO[0]}:${FUNCNAME[1]}) $*"
 }
 
+log "test version"
+./build/bin/version-c-api
+
 echo "SLID_EXE is $SLID_EXE"
 echo "SID_EXE is $SID_EXE"
 echo "AT_EXE is $AT_EXE"
@@ -18,13 +21,13 @@ log "------------------------------------------------------------"
 log "Test adding punctuations                                    "
 log "------------------------------------------------------------"
 
-curl -SL -O https://github.com/k2-fsa/sherpa-onnx/releases/download/punctuation-models/sherpa-onnx-punct-ct-transformer-zh-en-vocab272727-2024-04-12.tar.bz2
+curl -SL -O https://github.com/k2-fsa/sherpa-onnx/releases/download/punctuation-models/sherpa-onnx-punct-ct-transformer-zh-en-vocab272727-2024-04-12-int8.tar.bz2
 ls -lh
-tar xf sherpa-onnx-punct-ct-transformer-zh-en-vocab272727-2024-04-12.tar.bz2
-ls -lh sherpa-onnx-punct-ct-transformer-zh-en-vocab272727-2024-04-12
-rm sherpa-onnx-punct-ct-transformer-zh-en-vocab272727-2024-04-12.tar.bz2
+tar xf sherpa-onnx-punct-ct-transformer-zh-en-vocab272727-2024-04-12-int8.tar.bz2
+ls -lh sherpa-onnx-punct-ct-transformer-zh-en-vocab272727-2024-04-12-int8
+rm sherpa-onnx-punct-ct-transformer-zh-en-vocab272727-2024-04-12-int8.tar.bz2
 $PUNCT_EXE
-rm -rf sherpa-onnx-punct-ct-transformer-zh-en-vocab272727-2024-04-12
+rm -rf sherpa-onnx-punct-ct-transformer-zh-en-vocab272727-2024-04-12-int8
 
 log "------------------------------------------------------------"
 log "Test audio tagging                                          "

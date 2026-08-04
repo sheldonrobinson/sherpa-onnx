@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 
+#include "sherpa-onnx/csrc/file-utils.h"
 #include "sherpa-onnx/csrc/macros.h"
 #include "sherpa-onnx/csrc/provider.h"
 #include "sherpa-onnx/csrc/text-utils.h"
@@ -54,11 +55,14 @@ static void ParseConfigFile(
   // For spacemit, the config file can contain the following
   // SPACEMIT_EP_USE_GLOBAL_INTRA_THREAD=1
   // ... and so on.
+  // Keys prefixed with "SessionConfig." are forwarded (prefix stripped) to
+  // Ort::SessionOptions::AddConfigEntry, e.g.,
+  // SessionConfig.mlas.disable_kleidiai=1
   // # is treated as comment. Empty lines are ignored. The legacy key:value
   // format is still supported for backward compatibility.
   // additionally, DEBUG=1 can be set to print all configs read from the file.
 
-  std::ifstream is(config_path);
+  auto is = OpenInputFile(config_path);
   if (!is.is_open()) {
     SHERPA_ONNX_LOGE("Failed to open provider config file: %s",
                      config_path.c_str());
@@ -192,6 +196,36 @@ Ort::SessionOptions GetSessionOptionsImpl(
       sess_opts.DisableCpuMemArena();
     }
     config.erase("EnableCpuMemArena");
+  }
+
+  // Keys prefixed with "SessionConfig." are forwarded verbatim (prefix
+  // stripped) to Ort::SessionOptions::AddConfigEntry, e.g.,
+  //   SessionConfig.mlas.disable_kleidiai=1
+  // becomes AddConfigEntry("mlas.disable_kleidiai", "1"). This exposes
+  // onnxruntime session configuration entries
+  // (see onnxruntime_session_options_config_keys.h) without requiring a
+  // dedicated sherpa-onnx option for each of them. Only this explicit
+  // namespace is forwarded, so provider-specific and other un-prefixed keys
+  // retain their current behavior.
+  {
+    static constexpr const char kSessionConfigPrefix[] = "SessionConfig.";
+    static constexpr size_t kSessionConfigPrefixLen =
+        sizeof(kSessionConfigPrefix) - 1;
+    for (auto it = config.begin(); it != config.end();) {
+      if (it->first.compare(0, kSessionConfigPrefixLen, kSessionConfigPrefix) ==
+          0) {
+        std::string key = it->first.substr(kSessionConfigPrefixLen);
+        if (key.empty()) {
+          SHERPA_ONNX_LOGE("Ignore empty session config key: %s",
+                           it->first.c_str());
+        } else {
+          sess_opts.AddConfigEntry(key.c_str(), it->second.c_str());
+        }
+        it = config.erase(it);
+      } else {
+        ++it;
+      }
+    }
   }
 
   // If you want to speed up initialization, please uncomment the following line

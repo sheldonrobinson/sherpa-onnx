@@ -8,6 +8,9 @@ log() {
   echo -e "$(date '+%Y-%m-%d %H:%M:%S') (${fname}:${BASH_LINENO[0]}:${FUNCNAME[1]}) $*"
 }
 
+log "test version"
+python3 ./python-api-examples/version-test.py
+
 log "test Cohere Transcribe"
 
 curl -SL -O https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-cohere-transcribe-14-lang-int8-2026-04-01.tar.bz2
@@ -18,7 +21,7 @@ rm -rf sherpa-onnx-cohere-transcribe-14-lang-int8-2026-04-01
 
 log "test Qwen3 ASR"
 
-wget -q https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-qwen3-asr-0.6B-int8-2026-03-25.tar.bz2
+curl -SL -O https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-qwen3-asr-0.6B-int8-2026-03-25.tar.bz2
 tar xvf sherpa-onnx-qwen3-asr-0.6B-int8-2026-03-25.tar.bz2
 rm sherpa-onnx-qwen3-asr-0.6B-int8-2026-03-25.tar.bz2
 
@@ -35,13 +38,13 @@ rm -rf sherpa-onnx-qwen3-asr-0.6B-int8-2026-03-25
 
 log "test Supertonic TTS"
 
-curl -SL -O https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/sherpa-onnx-supertonic-tts-int8-2026-03-06.tar.bz2
-tar xvf sherpa-onnx-supertonic-tts-int8-2026-03-06.tar.bz2
-rm sherpa-onnx-supertonic-tts-int8-2026-03-06.tar.bz2
+curl -SL -O https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/sherpa-onnx-supertonic-3-tts-int8-2026-05-11.tar.bz2
+tar xvf sherpa-onnx-supertonic-3-tts-int8-2026-05-11.tar.bz2
+rm sherpa-onnx-supertonic-3-tts-int8-2026-05-11.tar.bz2
 
 python3 python-api-examples/supertonic-tts.py
 
-rm -rf sherpa-onnx-supertonic-tts-int8-2026-03-06
+rm -rf sherpa-onnx-supertonic-3-tts-int8-2026-05-11
 
 mkdir -p tts
 cp supertonic-en.wav tts/
@@ -229,7 +232,11 @@ curl -SL -O https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-reco
 
 curl -SL -O https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-segmentation-models/0-four-speakers-zh.wav
 
-python3 ./python-api-examples/offline-speaker-diarization.py
+if python3 -c "import librosa" 2>/dev/null; then
+  python3 ./python-api-examples/offline-speaker-diarization.py
+else
+  log "Skipping offline-speaker-diarization.py (librosa not installed)"
+fi
 
 rm -rf *.wav *.onnx ./sherpa-onnx-pyannote-segmentation-3-0
 
@@ -249,7 +256,7 @@ rm -rf /tmp/test-cluster
 export GIT_CLONE_PROTECTION_ACTIVE=false
 
 log "test offline SenseVoice CTC"
-url=https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17.tar.bz2
+url=https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17.tar.bz2
 name=$(basename $url)
 repo=$(basename -s .tar.bz2 $name)
 
@@ -271,7 +278,7 @@ python3 ./python-api-examples/offline-sense-voice-ctc-decode-files-with-hr.py
 
 rm -rf dict replace.fst test-hr.wav lexicon.txt
 
-if [[ $(uname) == Linux ]]; then
+if command -v ffmpeg &> /dev/null; then
   # It needs ffmpeg
   log  "generate subtitles (Chinese)"
   curl -SL -O https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx
@@ -279,7 +286,7 @@ if [[ $(uname) == Linux ]]; then
 
   python3 ./python-api-examples/generate-subtitles.py \
     --silero-vad-model=./silero_vad.onnx \
-    --sense-voice=$repo/model.onnx \
+    --sense-voice=$repo/model.int8.onnx \
     --tokens=$repo/tokens.txt \
     --num-threads=2 \
     ./lei-jun-test.wav
@@ -293,7 +300,7 @@ if [[ $(uname) == Linux ]]; then
 
   python3 ./python-api-examples/generate-subtitles.py \
     --silero-vad-model=./silero_vad.onnx \
-    --sense-voice=$repo/model.onnx \
+    --sense-voice=$repo/model.int8.onnx \
     --tokens=$repo/tokens.txt \
     --num-threads=2 \
     ./Obama.wav
@@ -340,6 +347,16 @@ ls -lh $repo
 python3 ./python-api-examples/add-punctuation.py
 
 rm -rf $repo
+
+log "test offline diacritization"
+
+curl -SL -O https://github.com/abjadai/catt/releases/download/v2/eo_model_onnx.zip
+unzip eo_model_onnx.zip -d catt_eo_model_onnx
+rm eo_model_onnx.zip
+
+python3 ./python-api-examples/add-diacritics.py
+
+rm -rf catt_eo_model_onnx
 
 log "test online punctuation"
 

@@ -42,7 +42,7 @@ function getErrorMessage(err) {
 
 self.onmessage = async (e) => {
   const { type, text, sid, speed, genConfig } = e.data;
-  if (type === "generate") {
+  if (type == "generate") {
     if (!tts) {
       return;
     }
@@ -68,7 +68,7 @@ self.onmessage = async (e) => {
         message: "Generation failed: " + getErrorMessage(err),
       });
     }
-  } else if (type === "generateWithConfig") {
+  } else if (type == "generateWithConfig") {
     if (!tts) {
       return;
     }

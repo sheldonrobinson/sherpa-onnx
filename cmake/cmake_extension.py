@@ -62,6 +62,7 @@ def get_binaries():
         "sherpa-onnx-offline",
         "sherpa-onnx-offline-audio-tagging",
         "sherpa-onnx-offline-denoiser",
+        "sherpa-onnx-offline-diacritization",
         "sherpa-onnx-offline-language-identification",
         "sherpa-onnx-offline-punctuation",
         "sherpa-onnx-offline-source-separation",
@@ -363,6 +364,3 @@ class BuildExtension(build_ext):
             shutil.rmtree(f"{install_dir}/share")
         if Path(f"{install_dir}/lib/pkgconfig").is_dir():
             shutil.rmtree(f"{install_dir}/lib/pkgconfig")
-
-        if is_macos():
-            os.remove(f"{install_dir}/lib/libonnxruntime.dylib")

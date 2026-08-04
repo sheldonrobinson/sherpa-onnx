@@ -1,6 +1,9 @@
 include(cargs)
 
 include_directories(${PROJECT_SOURCE_DIR})
+add_executable(version-c-api version-c-api.c)
+target_link_libraries(version-c-api sherpa-onnx-c-api)
+
 add_executable(decode-file-c-api decode-file-c-api.c)
 target_link_libraries(decode-file-c-api sherpa-onnx-c-api cargs)
 
@@ -97,6 +100,12 @@ target_link_libraries(cohere-transcribe-c-api sherpa-onnx-c-api)
 add_executable(nemo-parakeet-c-api nemo-parakeet-c-api.c)
 target_link_libraries(nemo-parakeet-c-api sherpa-onnx-c-api)
 
+add_executable(nemo-giga-am-v2-c-api nemo-giga-am-v2-c-api.c)
+target_link_libraries(nemo-giga-am-v2-c-api sherpa-onnx-c-api)
+
+add_executable(nemo-ctc-c-api nemo-ctc-c-api.c)
+target_link_libraries(nemo-ctc-c-api sherpa-onnx-c-api)
+
 add_executable(sense-voice-c-api sense-voice-c-api.c)
 target_link_libraries(sense-voice-c-api sherpa-onnx-c-api)
 
@@ -135,6 +144,9 @@ target_link_libraries(fire-red-asr-ctc-c-api sherpa-onnx-c-api)
 
 add_executable(streaming-zipformer-c-api streaming-zipformer-c-api.c)
 target_link_libraries(streaming-zipformer-c-api sherpa-onnx-c-api)
+
+add_executable(streaming-nemotron-c-api streaming-nemotron-c-api.c)
+target_link_libraries(streaming-nemotron-c-api sherpa-onnx-c-api)
 
 add_executable(streaming-zipformer-with-hr-c-api streaming-zipformer-with-hr-c-api.c)
 target_link_libraries(streaming-zipformer-with-hr-c-api sherpa-onnx-c-api)
